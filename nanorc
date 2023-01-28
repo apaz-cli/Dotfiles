@@ -1,0 +1,39 @@
+# If your distro doesn't have syntax by default
+# include "/usr/share/nano/*.nanorc"
+# Mouse selection
+set mouse
+set quickblank
+# Thou shalt indent with four spaces
+set tabsize 8
+#set tabstospaces
+# Keep indent levels
+set autoindent
+# Delete selected text with backspace
+set zap
+# Use regex in the search by default
+set regexp
+# Save cursor and search position
+set positionlog
+set historylog
+# Open files into new buffers by default
+set multibuffer
+# Home skips whitespace
+set smarthome
+# Soft wrap lines
+set softwrap
+set atblanks
+# Use a more lightweight statusbar
+#set minibar
+#set nohelp
+# Line numbers
+#set linenumbers
+# Nicer colors
+set titlecolor bold,green,gray
+set numbercolor bold,green,black
+set selectedcolor bold,green,gray
+set statuscolor bold,green,gray
+set promptcolor bold,green,gray
+set spotlightcolor bold,green,gray
+set functioncolor bold,green,black
+set errorcolor bold,red,gray
+set keycolor bold,black,green
