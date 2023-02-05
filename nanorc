@@ -1,3 +1,5 @@
+include "~/.nano/*.nanorc"
+
 # If your distro doesn't have syntax by default
 # include "/usr/share/nano/*.nanorc"
 # Mouse selection
