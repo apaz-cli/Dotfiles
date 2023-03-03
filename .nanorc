@@ -22,20 +22,20 @@ set multibuffer
 # Home skips whitespace
 set smarthome
 # Soft wrap lines
-set softwrap
-set atblanks
+#set softwrap
+#set atblanks
 # Use a more lightweight statusbar
 #set minibar
 #set nohelp
 # Line numbers
 #set linenumbers
 # Nicer colors
-set titlecolor bold,green,gray
+set titlecolor bold,green,lightblack
 set numbercolor bold,green,black
-set selectedcolor bold,green,gray
-set statuscolor bold,green,gray
-set promptcolor bold,green,gray
-set spotlightcolor bold,green,gray
+set selectedcolor bold,green,lightblack
+set statuscolor bold,green,lightblack
+set promptcolor bold,green,lightblack
+set spotlightcolor bold,green,lightblack
 set functioncolor bold,green,black
-set errorcolor bold,red,gray
+set errorcolor bold,red,lightblack
 set keycolor bold,black,green
