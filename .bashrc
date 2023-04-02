@@ -44,8 +44,23 @@ if ! shopt -oq posix; then
   fi
 fi
 
+HOSTNAME="$(cat /etc/hostname)";
+export EDITOR="/bin/nano"
 export PATH="/home/$USER/git/system/Scripts:$PATH:/home/$USER/.local/bin"
-. "$HOME/.cargo/env"
+
+# Add rust to path if installed
+if [ -f "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
+
+# Fix ssh into machines without xterm-kitty termcap.
+if [ "$TERM" = "xterm" ]; then
+  TERM="xterm-256color"
+elif [ "$TERM" = "xterm-kitty" ]; then
+  if [ ! "$HOSTNAME" = "$USER-laptop" ]; then
+    TERM="xterm-256color"
+  fi
+fi
 
 case "$TERM" in
 xterm*|rxvt*|screen)
@@ -60,8 +75,7 @@ esac
 
 __host_name() {
   local status="$?"
-  local hn="$(cat /etc/hostname)";
-  if [ ! "$hn" = "apaz-laptop" ]; then printf "@$hn"; fi
+  if [ ! "$HOSTNAME" = "$USER-laptop" ]; then printf "@$HOSTNAME"; fi
   return $status
 }
 
@@ -104,3 +118,4 @@ $GREENISH\w\
 $BLUISH]\$\
 $RESET \
 "
+
