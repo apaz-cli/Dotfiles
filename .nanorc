@@ -1,5 +1,7 @@
 include "~/.nano/*.nanorc"
 
+# Make F12 do a spell check
+set speller "aspell -x -c"
 # If your distro doesn't have syntax by default
 # include "/usr/share/nano/*.nanorc"
 # Mouse selection
