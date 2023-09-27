@@ -112,6 +112,15 @@ __git_print() {
   fi
 }
 
+__disk_color() {
+  local freegb="$(df -PBG / | awk 'NR==2 {print $4}' | sed 's/G//')"
+  if test $freegb -ge 5; then
+    printf "\033[32m"
+  else
+    printf "\033[31m"
+  fi
+}
+
 PS1="\
 $GREENISH\u\$(__host_name)\
 $BLUISH[\
@@ -120,7 +129,7 @@ $BLUISH][\
 \[\$(__git_color)\]\
 \$(__git_print)\
 $BLUISH][\
-$GREENISH\w\
+\$(__disk_color)\]\w\
 $BLUISH]\$\
 $RESET \
 "
