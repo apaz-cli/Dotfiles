@@ -62,6 +62,12 @@ elif [ "$TERM" = "xterm-kitty" ]; then
   fi
 fi
 
+# Automatically activate my conda environment on hyperplane.
+HOST="$(hostname)"
+if [ "$HOST" = "hyperplane1" ]; then
+  conda activate thunder-3-10-9 2>/dev/null
+fi
+
 case "$TERM" in
 xterm*|rxvt*|screen)
     GREENISH="\[\033[32m\]"
