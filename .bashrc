@@ -46,7 +46,7 @@ fi
 
 HOSTNAME="$(cat /etc/hostname)";
 export EDITOR="/bin/nano"
-export PATH="/home/$USER/git/system/Scripts:$PATH:/home/$USER/.local/bin"
+export PATH="/home/$USER/git/system/Scripts:/home/$USER/Scripts:$PATH:/home/$USER/.local/bin"
 
 # Add rust to path if installed
 if [ -f "$HOME/.cargo/env" ]; then
@@ -60,6 +60,25 @@ elif [ "$TERM" = "xterm-kitty" ]; then
   if [ ! "$HOSTNAME" = "$USER-laptop" ]; then
     TERM="xterm-256color"
   fi
+fi
+
+# Automatically activate my conda environment on hyperplane.
+HOST="$(hostname)"
+if [ "$HOST" = "hyperplane1" ]; then
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/apaz/home/apaz/.miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/apaz/home/apaz/.miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/apaz/home/apaz/.miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/apaz/home/apaz/.miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
 fi
 
 case "$TERM" in
