@@ -107,7 +107,8 @@ __git_print() {
 }
 
 __disk_color() {
-  local freegb="$(df -PBG / | awk 'NR==2 {print $4}' | sed 's/G//')"
+  local mnt="$(findmnt -T. | tail -n 1 | awk '{print $1}')"
+  local freegb="$(df -PBG $mnt | awk 'NR==2 {print $4}' | sed 's/G//')"
   if test $freegb -ge 5; then
     printf "\033[32m"
   else
