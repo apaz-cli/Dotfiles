@@ -53,6 +53,11 @@ if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
 
+# Add local nvim to path if installed
+if [ -f "$HOME/.neovim/bin" ]; then
+  PATH="$HOME/.neovim/bin:$PATH"
+fi
+
 # Fix ssh into machines without xterm-kitty termcap.
 if [ "$TERM" = "xterm" ]; then
   TERM="xterm-256color"
