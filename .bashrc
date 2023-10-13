@@ -54,9 +54,18 @@ if [ -f "$HOME/.cargo/env" ]; then
 fi
 
 # Add local nvim to path if installed
-if [ -f "$HOME/.neovim/bin" ]; then
+if [ -d "$HOME/.neovim/bin" ]; then
   PATH="$HOME/.neovim/bin:$PATH"
 fi
+
+# Add function to source thunder script
+function thunder() {
+  if [ -f "$HOME/Scripts/thunder" ]; then
+    source "$HOME/Scripts/thunder"
+  elif [ -f "$HOME/git/system/Scripts/thunder" ]; then
+    source "$HOME/git/system/Scripts/thunder"
+  fi
+}
 
 # Fix ssh into machines without xterm-kitty termcap.
 if [ "$TERM" = "xterm" ]; then
