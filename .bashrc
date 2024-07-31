@@ -13,14 +13,11 @@ esac
 HISTCONTROL=ignoreboth
 
 # sh Options
-shopt -s histappend
-shopt -s checkwinsize
-shopt -s globstar
-shopt -s checkwinsize
+shopt -s histappend checkwinsize globstar extglob
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=10000
-HISTFILESIZE=20000
+HISTFILESIZE=1000000
 
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
@@ -31,6 +28,7 @@ if [ -x /usr/bin/dircolors ]; then
     alias ls='ls --color=auto'
     alias dir='dir --color=auto'
     alias grep='grep --color=auto'
+    alias venv='source _venv'
 fi
 
 # enable programmable completion features (you don't need to enable
@@ -46,7 +44,8 @@ fi
 
 HOSTNAME="$(cat /etc/hostname)";
 export EDITOR="/bin/nano"
-export PATH="/home/$USER/git/system/Scripts:/home/$USER/Scripts:$PATH:/home/$USER/.local/bin"
+export PATH="/home/$USER/git/Scripts:/home/$USER/Scripts:$PATH:/home/$USER/.local/bin"
+export PATH="$PATH:/usr/bin/go/bin"
 
 # Add rust to path if installed
 if [ -f "$HOME/.cargo/env" ]; then
@@ -58,12 +57,29 @@ if [ -d "$HOME/.neovim/bin" ]; then
   PATH="$HOME/.neovim/bin:$PATH"
 fi
 
+# Add conda to path if installed
+if [ -d "$HOME/.miniconda.d/bin" ]; then
+  PATH="$PATH:$HOME/.miniconda.d/bin"
+elif [ -d "$HOME/.miniconda/bin" ]; then
+  PATH="$PATH:$HOME/.miniconda/bin"
+elif [ -d "$HOME/miniconda/bin" ]; then
+  PATH="$PATH:$HOME/miniconda/bin"
+fi
+
+# Add CUDA to path if installed
+if [ -d "/usr/local/cuda" ]; then
+  PATH="/usr/local/cuda/bin:$PATH"
+  #LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib"
+  LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
+fi
+
+
 # Add function to source thunder script
 function thunder() {
   if [ -f "$HOME/Scripts/thunder" ]; then
     source "$HOME/Scripts/thunder"
-  elif [ -f "$HOME/git/system/Scripts/thunder" ]; then
-    source "$HOME/git/system/Scripts/thunder"
+  elif [ -f "$HOME/git/Scripts/thunder" ]; then
+    source "$HOME/git/Scripts/thunder"
   fi
 }
 
@@ -71,44 +87,34 @@ function thunder() {
 if [ "$TERM" = "xterm" ]; then
   TERM="xterm-256color"
 elif [ "$TERM" = "xterm-kitty" ]; then
-  if [ ! "$HOSTNAME" = "$USER-laptop" ]; then
+  if [ ! "$HOSTNAME" = "$USER-laptop" ] && [ ! "$HOSTNAME" = "$USER-desktop" ]; then
     TERM="xterm-256color"
   fi
 fi
 
 # Automatically activate my conda environment on hyperplane.
+# Don't do so on laptop/desktop.
 HOST="$(hostname)"
 if [ "$HOST" = "hyperplane1" ]; then
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/apaz/home/apaz/.miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+__conda_setup="$('/home/apaz/.miniconda.d/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
 else
-    if [ -f "/home/apaz/home/apaz/.miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/apaz/home/apaz/.miniconda3/etc/profile.d/conda.sh"
+    if [ -f "/home/apaz/.miniconda.d/etc/profile.d/conda.sh" ]; then
+        . "/home/apaz/.miniconda.d/etc/profile.d/conda.sh"
     else
-        export PATH="/home/apaz/home/apaz/.miniconda3/bin:$PATH"
+        export PATH="/home/apaz/.miniconda.d/bin:$PATH"
     fi
 fi
 unset __conda_setup
 # <<< conda initialize <<<
 fi
 
-case "$TERM" in
-xterm*|rxvt*|screen)
-    GREENISH="\[\033[32m\]"
-    BLUISH="\[\033[94m\]"
-    CYANISH="\[\033[96m\]"
-    RESET="\[\033[00m\]"
-    ;;
-*)
-    ;;
-esac
-
 __host_name() {
   local status="$?"
-  if [ ! "$HOSTNAME" = "$USER-laptop" ]; then printf "@$HOSTNAME"; fi
+  if [ "$HOSTNAME" != "$USER-laptop" ] && [ "$HOSTNAME" != "$USER-desktop" ]; then printf "@$HOSTNAME"; fi
   return $status
 }
 
@@ -150,15 +156,15 @@ __disk_color() {
 }
 
 PS1="\
-$GREENISH\u\$(__host_name)\
-$BLUISH[\
-\[\$(if test \$? -eq 0; then echo '\033[32m'; else echo '\033[31m'; fi)\]x\
-$BLUISH][\
+\[\033[32m\]\u\$(__host_name)\
+\[\033[94m\][\
+\[\$(if test \$? -eq 0; then printf '\033[32m'; else printf '\033[31m'; fi)\]x\
+\[\033[94m\]][\
 \[\$(__git_color)\]\
 \$(__git_print)\
-$BLUISH][\
-\$(__disk_color)\]\w\
-$BLUISH]\$\
-$RESET \
+\[\033[94m\]][\
+\[\$(__disk_color)\]\w\
+\[\033[94m\]]\$\
+\[\033[00m\] \
 "
 
