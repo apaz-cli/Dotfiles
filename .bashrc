@@ -8,16 +8,12 @@ case $- in
       *) return;;
 esac
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
+# Ignore duplicates in the history, and also lines starting with space.
 HISTCONTROL=ignoreboth
-
-# sh Options
-shopt -s histappend checkwinsize globstar extglob
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
 HISTSIZE=10000
 HISTFILESIZE=1000000
+
+shopt -s histappend checkwinsize globstar extglob
 
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
@@ -69,7 +65,6 @@ fi
 # Add CUDA to path if installed
 if [ -d "/usr/local/cuda" ]; then
   PATH="/usr/local/cuda/bin:$PATH"
-  #LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib"
   LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
 fi
 
