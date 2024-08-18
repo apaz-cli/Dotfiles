@@ -2,18 +2,21 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+#############################
+## BASH CONFIG AND ALIASES ##
+#############################
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
       *) return;;
 esac
 
-# Ignore duplicates in the history, and also lines starting with space.
+shopt -s histappend checkwinsize globstar extglob
+
 HISTCONTROL=ignoreboth
 HISTSIZE=10000
 HISTFILESIZE=1000000
-
-shopt -s histappend checkwinsize globstar extglob
 
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
@@ -38,22 +41,27 @@ if ! shopt -oq posix; then
   fi
 fi
 
-HOSTNAME="$(cat /etc/hostname)";
+
+##################
+## $PATH CONFIG ##
+##################
+
+HOSTNAME="$(hostname)";
 export EDITOR="/bin/nano"
-export PATH="/home/$USER/git/Scripts:/home/$USER/Scripts:$PATH:/home/$USER/.local/bin"
-export PATH="$PATH:/usr/bin/go/bin"
+export PATH="$PATH:/home/$USER/.local/bin:/usr/bin/go/bin"
 
 # Add rust to path if installed
 if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
 
-# Add local nvim to path if installed
+# Add nvim to path if installed
 if [ -d "$HOME/.neovim/bin" ]; then
   PATH="$HOME/.neovim/bin:$PATH"
 fi
 
 # Add conda to path if installed
+# TODO: Reinstall conda on hyperplane and clean up.
 if [ -d "$HOME/.miniconda.d/bin" ]; then
   PATH="$PATH:$HOME/.miniconda.d/bin"
 elif [ -d "$HOME/.miniconda/bin" ]; then
@@ -65,16 +73,43 @@ fi
 # Add CUDA to path if installed
 if [ -d "/usr/local/cuda" ]; then
   PATH="/usr/local/cuda/bin:$PATH"
-  LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
+  if [ "$LD_LIBRARY_PATH" = "" ]; then
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib"
+  else
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
+  fi
 fi
 
+# Add Scripts repo to path if installed
+if [ -d "$HOME/git/Scripts" ]; then
+  SCRIPTS_DIR="$HOME/git/Scripts"
+  PATH="$SCRIPTS_DIR:$PATH"
+elif [ -d "$HOME/Scripts" ]; then
+  SCRIPTS_DIR="$HOME/Scripts"
+  PATH="$SCRIPTS_DIR:$PATH"
+fi
+
+# Find git folder.
+if [ ! "$SCRIPTS_DIR" = "" ]; then
+  GIT_DIR="$(dirname "$SCRIPTS_DIR")"
+fi
+
+# Find secrets repo. Source all the API keys.
+if [ ! "$GIT_DIR" = "" ] && [ -d "$GIT_DIR/Secrets/env_vars" ]; then
+  for __env_file in "$GIT_DIR"/Secrets/env_vars/*; do
+    if [ -f "$__env_file" ]; then
+      . "$__env_file"
+    fi
+  done
+  unset __env_file
+fi
 
 # Add function to source thunder script
 function thunder() {
-  if [ -f "$HOME/Scripts/thunder" ]; then
-    source "$HOME/Scripts/thunder"
-  elif [ -f "$HOME/git/Scripts/thunder" ]; then
-    source "$HOME/git/Scripts/thunder"
+  if [ -f "$SCRIPTS_DIR/thunder" ]; then
+    source "$SCRIPTS_DIR/thunder"
+  else
+    echo "thunder script not found."
   fi
 }
 
@@ -89,8 +124,8 @@ fi
 
 # Automatically activate my conda environment on hyperplane.
 # Don't do so on laptop/desktop.
-HOST="$(hostname)"
-if [ "$HOST" = "hyperplane1" ]; then
+
+if [ "$HOSTNAME" = "hyperplane1" ]; then
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/home/apaz/.miniconda.d/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
@@ -107,12 +142,19 @@ unset __conda_setup
 # <<< conda initialize <<<
 fi
 
+################
+## PS1 CONFIG ##
+################
+
+# Print @hostname if on a different machine. Otherwise, don't.
 __host_name() {
   local status="$?"
   if [ "$HOSTNAME" != "$USER-laptop" ] && [ "$HOSTNAME" != "$USER-desktop" ]; then printf "@$HOSTNAME"; fi
   return $status
 }
 
+# Print the red color escape code if there working directory
+# is a git repo and there aer unstaged changes, green otherwise.
 __git_color() {
   local gb="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)";
   if [ -n "$gb" ]; then
@@ -126,6 +168,9 @@ __git_color() {
   fi
 }
 
+# Print the name of the current git branch if the working directory is a git repo.
+# Otherwise, if the working directory contains git repos, print the repo count.
+# Otherwise, print "-".
 __git_print() {
   local gb="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)";
   if [ -n "$gb" ]; then
@@ -140,6 +185,8 @@ __git_print() {
   fi
 }
 
+# If there's less than 5GB of space remaining on disk, print
+# the color escape code for red. Otherwise, print the code for green.
 __disk_color() {
   local mnt="$(findmnt -T. | tail -n 1 | awk '{print $1}')"
   local freegb="$(df -PBG $mnt | awk 'NR==2 {print $4}' | sed 's/G//')"
@@ -149,6 +196,14 @@ __disk_color() {
     printf "\033[31m"
   fi
 }
+
+# Combine all of the above into a prompt.
+# It looks like:
+#
+# username@__host_name[x][__git_print][~/$PWD]$ echo "Hello WOrld!"
+#
+# Where the x in the first box is green if the previous command succeeded, and red if it failed.
+# See the comments above to understand how the other box contents are colored.
 
 PS1="\
 \[\033[32m\]\u\$(__host_name)\
