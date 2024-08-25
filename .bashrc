@@ -57,46 +57,46 @@ fi
 
 # Add nvim to path if installed
 if [ -d "$HOME/.neovim/bin" ]; then
-  PATH="$HOME/.neovim/bin:$PATH"
+  export PATH="$HOME/.neovim/bin:$PATH"
 fi
 
 # Add conda to path if installed
 # TODO: Reinstall conda on hyperplane and clean up.
 if [ -d "$HOME/.miniconda.d/bin" ]; then
-  PATH="$PATH:$HOME/.miniconda.d/bin"
+  export PATH="$PATH:$HOME/.miniconda.d/bin"
 elif [ -d "$HOME/.miniconda/bin" ]; then
-  PATH="$PATH:$HOME/.miniconda/bin"
+  export PATH="$PATH:$HOME/.miniconda/bin"
 elif [ -d "$HOME/miniconda/bin" ]; then
-  PATH="$PATH:$HOME/miniconda/bin"
+  export PATH="$PATH:$HOME/miniconda/bin"
 fi
 
 # Add CUDA to path if installed
 if [ -d "/usr/local/cuda" ]; then
-  PATH="/usr/local/cuda/bin:$PATH"
+  export PATH="/usr/local/cuda/bin:$PATH"
   if [ "$LD_LIBRARY_PATH" = "" ]; then
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib"
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib"
   else
-    LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="/usr/local/cuda/lib64:/usr/local/cuda/lib:$LD_LIBRARY_PATH"
   fi
 fi
 
 # Add Scripts repo to path if installed
 if [ -d "$HOME/git/Scripts" ]; then
-  SCRIPTS_DIR="$HOME/git/Scripts"
-  PATH="$SCRIPTS_DIR:$PATH"
+  export SCRIPTS_DIR="$HOME/git/Scripts"
+  export PATH="$SCRIPTS_DIR:$PATH"
 elif [ -d "$HOME/Scripts" ]; then
-  SCRIPTS_DIR="$HOME/Scripts"
-  PATH="$SCRIPTS_DIR:$PATH"
+  export SCRIPTS_DIR="$HOME/Scripts"
+  export PATH="$SCRIPTS_DIR:$PATH"
 fi
 
 # Find git folder.
 if [ ! "$SCRIPTS_DIR" = "" ]; then
-  GIT_DIR="$(dirname "$SCRIPTS_DIR")"
+  export REPOS_DIR="$(dirname "$SCRIPTS_DIR")"
 fi
 
 # Find secrets repo. Source all the API keys.
-if [ ! "$GIT_DIR" = "" ] && [ -d "$GIT_DIR/Secrets/env_vars" ]; then
-  for __env_file in "$GIT_DIR"/Secrets/env_vars/*; do
+if [ ! "$REPOS_DIR" = "" ] && [ -d "$REPOS_DIR/Secrets/env_vars" ]; then
+  for __env_file in "$REPOS_DIR"/Secrets/env_vars/*; do
     if [ -f "$__env_file" ]; then
       . "$__env_file"
     fi
@@ -115,10 +115,10 @@ function thunder() {
 
 # Fix ssh into machines without xterm-kitty termcap.
 if [ "$TERM" = "xterm" ]; then
-  TERM="xterm-256color"
+  export TERM="xterm-256color"
 elif [ "$TERM" = "xterm-kitty" ]; then
   if [ ! "$HOSTNAME" = "$USER-laptop" ] && [ ! "$HOSTNAME" = "$USER-desktop" ]; then
-    TERM="xterm-256color"
+    export TERM="xterm-256color"
   fi
 fi
 
@@ -188,7 +188,9 @@ __git_print() {
 # If there's less than 5GB of space remaining on disk, print
 # the color escape code for red. Otherwise, print the code for green.
 __disk_color() {
-  local mnt="$(findmnt -T. | tail -n 1 | awk '{print $1}')"
+  # TODO: There is a bug here. If the mount dir has a space in
+  # it, then awk will return only the first part of the path.
+  local mnt="$(findmnt -T"$HOME" | tail -n 1 | awk '{print $1}')"
   local freegb="$(df -PBG $mnt | awk 'NR==2 {print $4}' | sed 's/G//')"
   if test $freegb -ge 5; then
     printf "\033[32m"
