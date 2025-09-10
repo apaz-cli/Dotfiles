@@ -55,6 +55,11 @@ if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
 
+# Add go to path if installed
+if [ -d "/usr/local/go/bin" ]; then
+  export PATH="/usr/local/go/bin:$PATH"
+fi
+
 # Add nvim to path if installed
 if [ -d "$HOME/.neovim/bin" ]; then
   export PATH="$HOME/.neovim/bin:$PATH"
