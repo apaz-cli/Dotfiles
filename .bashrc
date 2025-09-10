@@ -12,7 +12,8 @@ case $- in
       *) return;;
 esac
 
-shopt -s histappend checkwinsize globstar extglob
+shopt -s checkwinsize globstar extglob
+# shopt -s histappend
 
 HISTCONTROL=ignoreboth
 HISTSIZE=10000
@@ -55,14 +56,20 @@ if [ -f "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
 
-# Add go to path if installed
-if [ -d "/usr/local/go/bin" ]; then
-  export PATH="/usr/local/go/bin:$PATH"
+# Add rust to path if installed.
+# Rust wants to manage uv, but don't let it.
+if [ -d "/$HOME/.cargo/bin" ]; then
+  export PATH="$PATH:$HOME/.cargo/bin"
 fi
 
 # Add nvim to path if installed
 if [ -d "$HOME/.neovim/bin" ]; then
   export PATH="$HOME/.neovim/bin:$PATH"
+fi
+
+# Add spicetify if installed. No idea why they decided to do it like this.
+if [ -f "$HOME/.spicetify" ]; then
+  export PATH=$PATH:/home/apaz/.spicetify
 fi
 
 # Add conda to path if installed
@@ -94,13 +101,22 @@ elif [ -d "$HOME/Scripts" ]; then
   export PATH="$SCRIPTS_DIR:$PATH"
 fi
 
+# Add Secrets repo in the same manner
+if [ -d "$HOME/git/Secrets" ]; then
+  export SECRETS_DIR="$HOME/git/Secrets"
+  export PATH="$SECRETS_DIR:$PATH"
+elif [ -d "$HOME/Secrets" ]; then
+  export SECRETS_DIR="$HOME/Secrets"
+  export PATH="$SECRETS_DIR:$PATH"
+fi
+
 # Find git folder.
 if [ ! "$SCRIPTS_DIR" = "" ]; then
   export REPOS_DIR="$(dirname "$SCRIPTS_DIR")"
 fi
 
 # Find secrets repo. Source all the API keys.
-if [ ! "$REPOS_DIR" = "" ] && [ -d "$REPOS_DIR/Secrets/env_vars" ]; then
+if [ ! "$SECRETS_DIR" = "" ]; then
   for __env_file in "$REPOS_DIR"/Secrets/env_vars/*; do
     if [ -f "$__env_file" ]; then
       . "$__env_file"
