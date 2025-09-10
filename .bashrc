@@ -207,7 +207,7 @@ __disk_color() {
 # Combine all of the above into a prompt.
 # It looks like:
 #
-# username@__host_name[x][__git_print][~/$PWD]$ echo "Hello WOrld!"
+# username@__host_name[x][__git_print][~/$PWD]$ echo "Hello World!"
 #
 # Where the x in the first box is green if the previous command succeeded, and red if it failed.
 # See the comments above to understand how the other box contents are colored.
