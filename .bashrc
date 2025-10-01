@@ -69,7 +69,7 @@ fi
 
 # Add spicetify if installed. No idea why they decided to do it like this.
 if [ -f "$HOME/.spicetify" ]; then
-  export PATH=$PATH:/home/apaz/.spicetify
+  export PATH="$PATH:$HOME/.spicetify"
 fi
 
 # Add conda to path if installed
