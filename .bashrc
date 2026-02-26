@@ -92,6 +92,17 @@ if [ -d "/usr/local/cuda" ]; then
   fi
 fi
 
+# Add ROCm to path if installed
+if [ -d "/opt/rocm" ]; then
+  export ROCM_HOME="/opt/rocm"
+  export PATH="$ROCM_HOME/bin:$PATH"
+  if [ "$LD_LIBRARY_PATH" = "" ]; then
+    export LD_LIBRARY_PATH="$ROCM_HOME/lib"
+  else
+    export LD_LIBRARY_PATH="$ROCM_HOME/lib:$LD_LIBRARY_PATH"
+  fi
+fi
+
 # Add Scripts repo to path if installed
 if [ -d "$HOME/git/Scripts" ]; then
   export SCRIPTS_DIR="$HOME/git/Scripts"
